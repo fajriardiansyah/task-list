@@ -21,5 +21,5 @@ Aplikasi pengembangan untuk kepentingan operasional
 - Linking Storage folder to public
       php artisan storage:link
 
-9. Serve the application
-php artisan serve
+- Serve the application
+      php artisan serve
