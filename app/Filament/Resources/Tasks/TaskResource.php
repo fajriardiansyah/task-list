@@ -22,6 +22,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Tables;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Support\Enums\VerticalAlignment;
 
 class TaskResource extends Resource
 {
@@ -70,13 +71,13 @@ class TaskResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->columns([
+            ->striped()
+            ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('description')
-                    ->limit(50)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->wrap()
+                    ->lineClamp(2),
                 Tables\Columns\TextColumn::make('due_date')
                     ->date()
                     ->sortable()
@@ -101,47 +102,47 @@ class TaskResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('due_date_countdown')
-                ->label('Sisa Waktu')
-                ->state(function ($record) {
-                    if (!$record->due_date) {
-                        return 'Tidak ada deadline';
-                    }
+                    ->label('Sisa Waktu')
+                    ->state(function ($record) {
+                        if (!$record->due_date) {
+                            return 'Tidak ada deadline';
+                        }
 
-                    $now = Carbon::now();
-                    $dueDate = Carbon::parse($record->due_date);
-                    
-                    // Hitung selisih hari dan pastikan hasilnya bilangan bulat
-                    $diffInDays = (int) $now->diffInDays($dueDate, false);
+                        $now = Carbon::now();
+                        $dueDate = Carbon::parse($record->due_date);
+                        
+                        // Hitung selisih hari dan pastikan hasilnya bilangan bulat
+                        $diffInDays = (int) $now->diffInDays($dueDate, false);
 
-                    if ($diffInDays < 0) {
-                        $diffInDays = abs($diffInDays);
-                        return "Terlambat $diffInDays hari";
-                    } elseif ($diffInDays === 0) {
-                        return 'Hari ini';
-                    } else {
-                        return "$diffInDays hari lagi";
-                    }
-                })
-                ->badge()
-                ->color(function ($record) {
-                    if (!$record->due_date) {
-                        return 'gray';
-                    }
-                    $now = Carbon::now();
-                    $dueDate = Carbon::parse($record->due_date);
-                    $diffInDays = (int) $now->diffInDays($dueDate, false);
+                        if ($diffInDays < 0) {
+                            $diffInDays = abs($diffInDays);
+                            return "Terlambat $diffInDays hari";
+                        } elseif ($diffInDays === 0) {
+                            return 'Hari ini';
+                        } else {
+                            return "$diffInDays hari lagi";
+                        }
+                    })
+                    ->badge()
+                    ->color(function ($record) {
+                        if (!$record->due_date) {
+                            return 'gray';
+                        }
+                        $now = Carbon::now();
+                        $dueDate = Carbon::parse($record->due_date);
+                        $diffInDays = (int) $now->diffInDays($dueDate, false);
 
-                    if ($diffInDays > 7) {
-                        return 'info';
-                    } elseif ($diffInDays > 0) {
-                        return 'warning';
-                    } elseif ($diffInDays === 0) {
-                        return 'warning';
-                    } else {
-                        return 'danger';
-                    }
-                })
-                ->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('due_date', $direction)),
+                        if ($diffInDays > 7) {
+                            return 'info';
+                        } elseif ($diffInDays > 0) {
+                            return 'warning';
+                        } elseif ($diffInDays === 0) {
+                            return 'warning';
+                        } else {
+                            return 'danger';
+                        }
+                    })
+                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('due_date', $direction)),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
